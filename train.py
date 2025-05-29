@@ -100,7 +100,7 @@ def evaluate(model, tokenizer, datasets, device, dataset_labels_mapping, base_se
 
 def pre_process_dataset_and_train_supcon_encoder(args):
     device = 'cuda'
-    os.makedirs(args.output_dir, exist_ok=True)
+    os.makedirs(args.train_output_dir, exist_ok=True)
 
     if os.path.isdir(args.raw_data_extract_dir_name):
         shutil.rmtree(args.raw_data_extract_dir_name)
@@ -111,10 +111,10 @@ def pre_process_dataset_and_train_supcon_encoder(args):
 
     original_data_dir_path = os.path.join(args.raw_data_extract_dir_name, 'data')
 
-    preprocessing_data_dir_path = os.path.join(args.output_dir, args.preprocessing_data_dir)
+    preprocessing_data_dir_path = os.path.join(args.train_output_dir, args.preprocessing_data_dir)
     os.makedirs(preprocessing_data_dir_path, exist_ok=True)
 
-    model_output_dir_path = os.path.join(args.output_dir, 'Training_Output')
+    model_output_dir_path = os.path.join(args.train_output_dir, 'Training_Output')
     if os.path.isdir(model_output_dir_path):
         shutil.rmtree(model_output_dir_path)
     os.makedirs(model_output_dir_path)
@@ -369,7 +369,7 @@ def pre_process_dataset_and_train_supcon_encoder(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--output_dir', default='Results', type=str,
+    parser.add_argument('--train_output_dir', default='Results', type=str,
                         help='Name of the Output Directory')
     parser.add_argument('--raw_data_extract_dir_name', default='raw_data', type=str,
                         help='Name of the Raw Data Extract Directory')
@@ -385,8 +385,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=32, help='Batch Size for Dataloader')
     parser.add_argument('--learning_rate', type=float, default=5e-5, help='Starting value of Learning rate')
     parser.add_argument('--weight_decay', type=float, default=0.01, help='Learning rate weight decay')
-    parser.add_argument('--group_size', type=int, default=5, help='Group size for positive and negative examples in '
-                                                                  'contrastive loss')
+    parser.add_argument('--group_size', type=int, default=5, help='The number of distinct label anchors per batch')
     parser.add_argument('--num_warmup_steps', type=int, default=500, help='Warmup steps for lr scheduler')
     parser.add_argument('--base_encoder_model', default='FacebookAI/roberta-base', type=str,
                         help='Base Encoder Model to use', choices=['FacebookAI/roberta-base'])

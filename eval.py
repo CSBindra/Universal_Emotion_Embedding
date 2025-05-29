@@ -67,7 +67,7 @@ class SaveMetricsCallbackClassification(TrainerCallback):
 
 def evaluate_encoding_model(args):
     device = 'cuda'
-    os.makedirs(args.output_dir, exist_ok=True)
+    os.makedirs(args.eval_output_dir, exist_ok=True)
     os.makedirs(args.tensorboard_log_dir, exist_ok=True)
 
     encoder_path = os.path.join(args.encoder_dir, 'Training_Output', 'best_encoder.pt')
@@ -97,9 +97,9 @@ def evaluate_encoding_model(args):
     tokenizer = AutoTokenizer.from_pretrained(args.base_encoder_model)
 
     for dataset_name, dataset_info in dataset_meta_info.items():
-        if os.path.exists(os.path.join(args.output_dir, dataset_name)):
-            shutil.rmtree(os.path.join(args.output_dir, dataset_name))
-        os.makedirs(os.path.join(args.output_dir, dataset_name), exist_ok=True)
+        if os.path.exists(os.path.join(args.eval_output_dir, dataset_name)):
+            shutil.rmtree(os.path.join(args.eval_output_dir, dataset_name))
+        os.makedirs(os.path.join(args.eval_output_dir, dataset_name), exist_ok=True)
 
         if os.path.exists(os.path.join(args.tensorboard_log_dir, dataset_name)):
             shutil.rmtree(os.path.join(args.tensorboard_log_dir, dataset_name))
@@ -115,10 +115,10 @@ def evaluate_encoding_model(args):
         pre_processed_dataset = pre_process_eval_dataset(dataset, tokenizer, text_column, label_column_names,
                                                          dataset_type=args.dataset_category, split=0.2)
 
-        metrics_callback = metrics_callback_class(os.path.join(args.output_dir, dataset_name, 'epoch_metrics.json'))
+        metrics_callback = metrics_callback_class(os.path.join(args.eval_output_dir, dataset_name, 'epoch_metrics.json'))
 
         training_args = TrainingArguments(
-            output_dir=os.path.join(args.output_dir, dataset_name),
+            output_dir=os.path.join(args.eval_output_dir, dataset_name),
             logging_dir=os.path.join(args.tensorboard_log_dir, dataset_name),
             report_to="tensorboard",
             learning_rate=args.learning_rate,
@@ -147,7 +147,7 @@ def evaluate_encoding_model(args):
 
         test_metrics = trainer.evaluate(pre_processed_dataset["test"])
         print("Test metrics:", test_metrics)
-        with open(os.path.join(args.output_dir, dataset_name, 'test_metrics.json'), "w") as f:
+        with open(os.path.join(args.eval_output_dir, dataset_name, 'test_metrics.json'), "w") as f:
             json.dump(test_metrics, f, indent=4)
 
 
@@ -162,7 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--pre_trained_encoder', default='yes', type=str,
                         help='Flag to specify using pretrained encoder',
                         choices=['yes', 'no'])
-    parser.add_argument('--output_dir', default='Eval_Results', type=str,
+    parser.add_argument('--eval_output_dir', default='Eval_Results', type=str,
                         help='Name of the Output Directory')
     parser.add_argument('--encoder_dir', default='Results', type=str,
                         help='Name of the Preprocessing Data Directory')
